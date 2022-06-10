@@ -1,0 +1,36 @@
+﻿@model LoginVM
+
+@{ 
+    Layout=null;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="~/css-index/css-index.css" />
+    <title>Login</title>
+
+</head>
+
+<body>
+    <section class="area-login">
+        <h1>Giriş</h1>
+        <div class="login">
+            <div>
+                <img style="border-radius:38px" src="https://w7.pngwing.com/pngs/1/964/png-transparent-user-profile-computer-icons-login-profile-icon-police-officer-black-avatar-thumbnail.png" />
+            </div>
+            <form method="post">
+                <input asp-for="UserName"  placeholder="İstifadəçi adınız"  />
+                <input asp-for="Password" placeholder="Parolunuz" />
+                <input type="submit" value="Giriş" />
+                <div asp-validation-summary="ModelOnly"></div>
+            </form>
+            <p>Hesaba Ehtiyacınız Var? <a asp-action="Register">Qeydiyyatdan Keçin</a></p>
+        </div>
+    </section>
+</body>
+
+</html>

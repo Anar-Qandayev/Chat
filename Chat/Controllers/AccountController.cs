@@ -1,0 +1,79 @@
+﻿using Chat.DAL;
+using Chat.Models;
+using Chat.ViewModels;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Chat.Controllers
+{
+    public class AccountController : Controller
+    {
+        private readonly UserManager<AppUser> _userManager;
+        private readonly IWebHostEnvironment _env;
+        private readonly AppDbContext _context;
+        private readonly SignInManager<AppUser> _signInManager;
+
+        public AccountController(UserManager<AppUser> userManager,
+                                 IWebHostEnvironment env,
+                                 AppDbContext context,
+                                 SignInManager<AppUser> signInManager)
+        {
+            _userManager = userManager;
+            _env = env;
+            _context = context;
+            _signInManager = signInManager;
+        }
+        public IActionResult Login()
+        {
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginVM login)
+        {
+            AppUser user = _context.Users.SingleOrDefault(u => u.UserName == login.UserName);
+            var result=  await _signInManager.PasswordSignInAsync(user, login.Password, true, true);
+            if (!result.Succeeded)
+            { 
+               return View(login);
+            }
+            return RedirectToAction("Index", "Home");
+        }
+        public IActionResult Register()
+        {
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterVM register)
+        {
+            AppUser user = new AppUser
+            {
+                FullName = register.FullName,
+                UserName = register.UserName
+            };
+            await _userManager.CreateAsync(user, register.Password);
+            string fileName = register.UserName+register.Image.FileName;
+
+            using (FileStream fs = new FileStream(Path.Combine(_env.WebRootPath, "image", fileName), FileMode.Create))
+            {
+                register.Image.CopyTo(fs);
+            }
+
+            UserProfilePhoto up = new UserProfilePhoto
+            {
+                AppUser = user,
+                Url=fileName
+            };
+            await _context.UserProfilePhotos.AddAsync(up);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index","Home");
+        }
+    }
+}
